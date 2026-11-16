@@ -2,12 +2,14 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { subscribeHybridStatus, enableOnDevice, type HybridStatus } from './services/hybridAi';
 import { loadClaim, saveClaim, putPhoto, getPhoto, uid, type Claim } from './lib/claim';
 import { scanPhoto, shrink } from './lib/ai';
+import { getLang, setLang, s, type Lang } from './lib/i18n';
 import { Home } from './components/Home';
 import { RoomView } from './components/RoomView';
 import { Packet } from './components/Packet';
 import { Costs } from './components/Costs';
+import { Checkup } from './components/Checkup';
 
-export type View = { name: 'home' } | { name: 'room'; id: string } | { name: 'packet' } | { name: 'costs' };
+export type View = { name: 'home' } | { name: 'room'; id: string } | { name: 'packet' } | { name: 'costs' } | { name: 'checkup' };
 
 const CLOUD_KEY = 'ar:allowCloud';
 
@@ -16,6 +18,7 @@ export default function App() {
   const [view, setView] = useState<View>({ name: 'home' });
   const [status, setStatus] = useState<HybridStatus>({ online: navigator.onLine, device: 'unsupported' });
   const [allowCloud, setAllowCloud] = useState(() => localStorage.getItem(CLOUD_KEY) !== 'false');
+  const [lang, setLangState] = useState<Lang>(getLang);
   const [scanning, setScanning] = useState<string | null>(null);
   const [error, setError] = useState('');
   const busy = useRef(false);
@@ -32,6 +35,14 @@ export default function App() {
   useEffect(() => {
     scrollTo(0, 0);
   }, [view]);
+  useEffect(() => {
+    document.documentElement.lang = lang;
+  }, [lang]);
+
+  const changeLang = (l: Lang) => {
+    setLang(l);
+    setLangState(l);
+  };
 
   const canRead = status.device === 'available' || (status.online && allowCloud);
 
@@ -46,20 +57,21 @@ export default function App() {
         if (!p) break;
         setScanning(p.id);
         const blob = await getPhoto(p.id);
+        const markRead = (c: Claim) => ({ ...c, photos: c.photos.map((x) => (x.id === p.id ? { ...x, scanned: true } : x)) });
         if (!blob) {
-          setClaim((c) => ({ ...c, photos: c.photos.map((x) => (x.id === p.id ? { ...x, scanned: true } : x)) }));
+          claimRef.current = markRead(claimRef.current);
+          setClaim(markRead);
           continue;
         }
-        const { items, where } = await scanPhoto(blob, allowCloud && navigator.onLine);
+        const { items, where } = await scanPhoto(blob, allowCloud && navigator.onLine, getLang());
         setClaim((c) => ({
-          ...c,
-          photos: c.photos.map((x) => (x.id === p.id ? { ...x, scanned: true } : x)),
+          ...markRead(c),
           items: [...c.items, ...items.map((i) => ({ ...i, id: uid(), roomId: p.roomId, photoId: p.id, estimateBy: i.estimate === null ? null : ('ai' as const), where }))],
         }));
-        claimRef.current = { ...claimRef.current, photos: claimRef.current.photos.map((x) => (x.id === p.id ? { ...x, scanned: true } : x)) };
+        claimRef.current = markRead(claimRef.current);
       }
     } catch (e) {
-      setError(`Couldn't read a photo: ${(e as Error).message}. It's saved and will be read later.`);
+      setError(s("Couldn't read a photo: {msg}. It's saved and will be read later.", { msg: (e as Error).message }));
     } finally {
       busy.current = false;
       setScanning(null);
@@ -83,14 +95,22 @@ export default function App() {
     setClaim(next);
   }
 
-  const ctx = { claim, setClaim, status, allowCloud, setAllowCloud, scanning, error, canRead, setView, addPhotos, drain, enableNano: enableOnDevice };
+  const replaceClaim = (c: Claim) => {
+    claimRef.current = c;
+    setClaim(c);
+    setView({ name: 'home' });
+  };
+
+  const ctx = { claim, setClaim, replaceClaim, status, allowCloud, setAllowCloud, lang, changeLang, scanning, error, canRead, setView, addPhotos, drain, enableNano: enableOnDevice };
 
   return (
-    <div className="app">
+    // key={lang} re-renders every screen when the language changes.
+    <div className="app" key={lang}>
       {view.name === 'home' && <Home {...ctx} />}
       {view.name === 'room' && <RoomView {...ctx} roomId={view.id} />}
       {view.name === 'packet' && <Packet {...ctx} />}
       {view.name === 'costs' && <Costs {...ctx} />}
+      {view.name === 'checkup' && <Checkup {...ctx} />}
     </div>
   );
 }
@@ -98,9 +118,12 @@ export default function App() {
 export type Ctx = {
   claim: Claim;
   setClaim: React.Dispatch<React.SetStateAction<Claim>>;
+  replaceClaim: (c: Claim) => void;
   status: HybridStatus;
   allowCloud: boolean;
   setAllowCloud: (v: boolean) => void;
+  lang: Lang;
+  changeLang: (l: Lang) => void;
   scanning: string | null;
   error: string;
   canRead: boolean;

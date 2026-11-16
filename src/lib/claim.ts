@@ -38,6 +38,8 @@ export interface Expense {
   what: string;
   amount: number | null;
   date: string;
+  /** Photo id of the receipt in the photo store, if one was scanned. */
+  receipt?: string;
 }
 
 export interface Claim {

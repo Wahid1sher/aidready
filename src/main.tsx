@@ -10,3 +10,7 @@ createRoot(document.getElementById('root')!).render(
     <App />
   </StrictMode>
 );
+// Production only: a service worker in dev would serve stale modules over Vite's hot reload.
+if ('serviceWorker' in navigator && import.meta.env.PROD) {
+  addEventListener('load', () => navigator.serviceWorker.register('/sw.js').catch(() => {}));
+}

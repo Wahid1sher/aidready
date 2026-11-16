@@ -162,3 +162,27 @@ button:disabled { cursor: not-allowed; opacity: .5; }
 .grand { display: flex; justify-content: space-between; margin-top: 6px; padding: 14px; border-radius: 12px; background: var(--ink); color: #fff; font-weight: 600; }
 .grand .mono { color: var(--amber); font-size: 15px; }
 .actions { display: flex; gap: 8px; }
+
+/* Language, checkup, receipts, backup */
+.top-r { display: flex; align-items: center; gap: 8px; }
+.lang { display: flex; padding: 2px; border: 1px solid var(--line); border-radius: 999px; background: #fff; }
+.lang button { border: 0; background: none; padding: 3px 8px; border-radius: 999px; font: 500 11px var(--mono); color: var(--muted); }
+.lang button[aria-pressed='true'] { background: var(--ink); color: #fff; }
+.warn-ic { color: #dc2626; }
+.ok-ic { color: #16a34a; }
+.gap { width: 100%; display: grid; grid-template-columns: 92px 1fr auto; gap: 10px; align-items: center; padding: 12px 14px; border: 0; border-top: 1px solid var(--line2); background: none; text-align: left; font-size: 13.5px; }
+.gap:first-child { border-top: 0; }
+.gap:hover { background: #fafafa; }
+.gap .st { justify-self: start; }
+.urg { color: #b91c1c; background: #fef2f2; }
+.steps-text { white-space: pre-wrap; margin: 0; padding: 14px; border-radius: 12px; background: #eff6ff; color: #1e3a8a; font-size: 14px; line-height: 1.6; }
+.ok-line { display: flex; align-items: center; gap: 8px; color: #15803d; }
+.scan-receipt { margin-top: 18px; cursor: pointer; }
+.item.has-receipt { grid-template-columns: 44px 1fr 92px 30px; }
+.receipt { width: 44px; height: 44px; border-radius: 8px; overflow: hidden; background: #eef0f3; }
+.receipt img, .receipt .ph { width: 100%; height: 100%; object-fit: cover; display: block; }
+.backup { padding-bottom: 12px; }
+.bk-note { margin: 0; padding: 0 14px; font-size: 12.5px; color: var(--muted); line-height: 1.5; }
+.bk-row { display: flex; gap: 8px; padding: 10px 14px 0; }
+.bk-row label { cursor: pointer; }
+.bk-msg { margin: 10px 14px 0; font-size: 12.5px; color: #1d4ed8; }

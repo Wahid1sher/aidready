@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { cleanItems, fillLetter, packetFacts } from './ai';
+import { cleanItems, cleanReceipt, fillLetter, packetFacts } from './ai';
 import { newClaim } from './claim';
 
 describe('cleanItems', () => {
@@ -17,6 +17,15 @@ describe('cleanItems', () => {
       { name: 'Car', damage: 'Flooded', estimate: null },
     ]);
     expect(cleanItems('nope')).toEqual([]);
+  });
+});
+
+describe('cleanReceipt', () => {
+  it('keeps real dates only and rounds sane amounts', () => {
+    expect(cleanReceipt({ what: ' Motel 6 ', amount: 89.99, date: '2026-11-10' })).toEqual({ what: 'Motel 6', amount: 90, date: '2026-11-10' });
+    expect(cleanReceipt({ what: 'x', amount: 0, date: '2026-02-30' })).toEqual({ what: 'x', amount: null, date: '' });
+    expect(cleanReceipt({ what: 'x', amount: 5, date: 'Nov 10' }).date).toBe('');
+    expect(cleanReceipt(null)).toEqual({ what: '', amount: null, date: '' });
   });
 });
 

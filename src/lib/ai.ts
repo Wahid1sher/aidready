@@ -1,5 +1,6 @@
 import { generateJSON, generateText, InferenceMode, type Where } from '../services/hybridAi';
 import { money, totals, type Claim } from './claim';
+import type { Lang } from './i18n';
 
 export interface ScannedItem {
   name: string;
@@ -53,13 +54,61 @@ async function base64(b: Blob): Promise<string> {
 }
 
 /** Reads one room photo into a list of damaged items. Photos stay on this device unless cloud is allowed. */
-export async function scanPhoto(photo: Blob, allowCloud: boolean): Promise<{ items: ScannedItem[]; where: Where }> {
+export async function scanPhoto(photo: Blob, allowCloud: boolean, lang: Lang = 'en'): Promise<{ items: ScannedItem[]; where: Where }> {
   const r = await generateJSON<{ items: ScannedItem[] }>(
     'scan',
-    [SCAN_PROMPT, { type: 'inlineData', inlineData: { data: await base64(photo), mimeType: 'image/jpeg' } }],
-    { mode: allowCloud ? InferenceMode.PREFER_ON_DEVICE : InferenceMode.ONLY_ON_DEVICE, schema: ITEMS_SCHEMA, image: true, temperature: 0 }
+    [SCAN_PROMPT + (lang === 'es' ? '\nWrite name and damage in Spanish.' : ''), { type: 'inlineData', inlineData: { data: await base64(photo), mimeType: 'image/jpeg' } }],
+    { mode: allowCloud ? InferenceMode.PREFER_ON_DEVICE : InferenceMode.ONLY_ON_DEVICE, schema: ITEMS_SCHEMA, image: true, temperature: 0, outLang: lang }
   );
   return { items: cleanItems(r.data.items), where: r.where };
+}
+
+export interface ScannedReceipt {
+  what: string;
+  amount: number | null;
+  date: string;
+}
+
+const RECEIPT_SCHEMA = {
+  type: 'object',
+  properties: { what: { type: 'string' }, amount: { type: 'number' }, date: { type: 'string' } },
+  required: ['what', 'amount', 'date'],
+};
+
+/** Reads a receipt photo into one extra-cost entry. */
+export async function scanReceipt(photo: Blob, allowCloud: boolean, lang: Lang = 'en'): Promise<ScannedReceipt & { where: Where }> {
+  const prompt = `This is a photo of a receipt a disaster survivor paid (hotel, cleanup supplies, meals, repairs...).
+Reply as JSON:
+- what: the store or hotel name and what was bought, in a few words${lang === 'es' ? ', in Spanish' : ''}, e.g. "Home Depot, cleanup supplies"
+- amount: the final total paid, in US dollars; 0 if you cannot read it
+- date: the purchase date printed on the receipt as YYYY-MM-DD; "" if no date is printed. Never guess a date.`;
+  const r = await generateJSON<ScannedReceipt>(
+    'receipt',
+    [prompt, { type: 'inlineData', inlineData: { data: await base64(photo), mimeType: 'image/jpeg' } }],
+    { mode: allowCloud ? InferenceMode.PREFER_ON_DEVICE : InferenceMode.ONLY_ON_DEVICE, schema: RECEIPT_SCHEMA, image: true, temperature: 0, outLang: lang }
+  );
+  return { ...cleanReceipt(r.data), where: r.where };
+}
+
+/** Model output is untrusted: keep a real calendar date only, and a sane positive amount with cents. */
+export function cleanReceipt(raw: Partial<ScannedReceipt> | null | undefined): ScannedReceipt {
+  const n = Number(raw?.amount);
+  const d = String(raw?.date ?? '');
+  const valid = /^\d{4}-\d{2}-\d{2}$/.test(d) && !Number.isNaN(Date.parse(d + 'T12:00')) && new Date(d + 'T12:00').toISOString().slice(0, 10) === d;
+  return {
+    what: String(raw?.what ?? '').trim().slice(0, 80),
+    amount: Number.isFinite(n) && n > 0 && n < 100_000 ? Math.round(n) : null,
+    date: valid ? d : '',
+  };
+}
+
+/** Turns the checkup's gap list into three short, ordered next steps. */
+export async function nextSteps(gaps: string[], allowCloud: boolean, lang: Lang, onChunk: (t: string) => void) {
+  const prompt = `A disaster survivor is preparing a damage claim. These gaps were found in it:
+${gaps.map((g) => '- ' + g).join('\n')}
+Write the 3 most important next steps, most urgent first (deadlines first), as a numbered list. One short sentence each, warm and plain.
+Use only the gaps above; do not invent facts or rules.${lang === 'es' ? ' Write in Spanish.' : ''} No markdown other than the numbers.`;
+  return generateText('steps', prompt, { mode: allowCloud ? InferenceMode.PREFER_ON_DEVICE : InferenceMode.ONLY_ON_DEVICE, temperature: 0.2, outLang: lang }, onChunk);
 }
 
 /** Model output is untrusted: trim, cap, and turn 0 / nonsense estimates into "unknown". */
@@ -89,14 +138,14 @@ ${t.costs ? `Extra out-of-pocket costs (hotel, cleanup and similar): ${money(t.c
 }
 
 /** Drafts the cover letter. Cloud gives the best writing; on-device works too when offline. */
-export async function draftLetter(c: Claim, allowCloud: boolean, onChunk: (t: string) => void) {
+export async function draftLetter(c: Claim, allowCloud: boolean, lang: Lang, onChunk: (t: string) => void) {
   const prompt = `Write a short, plain cover letter (under 180 words) a household can send with their disaster damage inventory to an aid agency or insurer.
 Use only these facts; do not invent names, addresses, dates, policy numbers or amounts:
 ${packetFacts(c)}
 Start with "Dear [Insurer]," and end with "Sincerely," then [Your name] on its own line. Leave [Your name], [Address], [Claim or registration number] and [Insurer] exactly as written, as placeholders.
 Say the attached inventory lists each item with photos, and that estimates are replacement-cost estimates, not appraisals.
-No markdown.`;
-  return generateText('letter', prompt, { mode: allowCloud ? InferenceMode.PREFER_IN_CLOUD : InferenceMode.ONLY_ON_DEVICE, temperature: 0.3 }, onChunk);
+No markdown.${lang === 'es' ? '\nWrite the letter in Spanish, but keep every bracketed placeholder exactly as written above, in English.' : ''}`;
+  return generateText('letter', prompt, { mode: allowCloud ? InferenceMode.PREFER_IN_CLOUD : InferenceMode.ONLY_ON_DEVICE, temperature: 0.3, outLang: lang }, onChunk);
 }
 
 /** Fills the letter's placeholders with the person's details, on this device. Empty details keep the placeholder. */

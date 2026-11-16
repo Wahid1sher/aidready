@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { ArrowLeft, Download, Printer, Sparkles } from 'lucide-react';
 import type { Ctx } from '../App';
+import { locale, s } from '../lib/i18n';
 import { money, toCSV, totals } from '../lib/claim';
 import { draftLetter, fillLetter } from '../lib/ai';
 import { Thumb } from './Thumb';
@@ -31,10 +32,10 @@ export function Packet(c: Ctx) {
     setBusy(true);
     setErr('');
     try {
-      const r = await draftLetter(c.claim, cloudOk, setDraft);
+      const r = await draftLetter(c.claim, cloudOk, c.lang, setDraft);
       c.setClaim((x) => ({ ...x, packet: { text: r.data.trim(), at: Date.now(), where: r.where } }));
     } catch (e) {
-      setErr(`Couldn't write the letter: ${(e as Error).message}`);
+      setErr(s("Couldn't write the letter: {msg}", { msg: (e as Error).message }));
     } finally {
       setBusy(false);
       setDraft('');
@@ -45,44 +46,44 @@ export function Packet(c: Ctx) {
     <main className="screen packet">
       <header className="top noprint">
         <button className="back" onClick={() => c.setView({ name: 'home' })}>
-          <ArrowLeft size={18} aria-hidden /> Claim
+          <ArrowLeft size={18} aria-hidden /> {s('Claim')}
         </button>
         <div className="actions">
           <button className="mini" onClick={downloadCSV}>
             <Download size={15} aria-hidden /> CSV
           </button>
           <button className="mini" onClick={() => print()}>
-            <Printer size={15} aria-hidden /> Print or PDF
+            <Printer size={15} aria-hidden /> {s('Print or PDF')}
           </button>
         </div>
       </header>
 
-      <h1 className="doc-h">Household damage inventory</h1>
+      <h1 className="doc-h">{s('Household damage inventory')}</h1>
       <p className="sub">
-        Prepared {new Date().toLocaleDateString('en-US', { dateStyle: 'long' })} · {t.items} items · {c.claim.photos.length} photos
+        {s('Prepared {date} · {n} items · {p} photos', { date: new Date().toLocaleDateString(locale(), { dateStyle: 'long' }), n: t.items, p: c.claim.photos.length })}
       </p>
 
       <section className="noprint">
         <div className="sec-h">
-          <span>Your details</span>
-          <span className="muted">Stay on this device</span>
+          <span>{s('Your details')}</span>
+          <span className="muted">{s('Stay on this device')}</span>
         </div>
         <div className="details">
-          <input value={d.insurer ?? ''} placeholder="Insurance company or aid program" aria-label="Insurance company or aid program" onChange={(e) => setD('insurer', e.target.value)} />
-          <input value={d.name} placeholder="Your name" aria-label="Your name" autoComplete="name" onChange={(e) => setD('name', e.target.value)} />
-          <input value={d.address} placeholder="Damaged property address" aria-label="Damaged property address" autoComplete="street-address" onChange={(e) => setD('address', e.target.value)} />
-          <input value={d.ref} placeholder="Claim or registration number" aria-label="Claim or registration number" onChange={(e) => setD('ref', e.target.value)} />
+          <input value={d.insurer ?? ''} placeholder={s('Insurance company or aid program')} aria-label={s('Insurance company or aid program')} onChange={(e) => setD('insurer', e.target.value)} />
+          <input value={d.name} placeholder={s('Your name')} aria-label={s('Your name')} autoComplete="name" onChange={(e) => setD('name', e.target.value)} />
+          <input value={d.address} placeholder={s('Damaged property address')} aria-label={s('Damaged property address')} autoComplete="street-address" onChange={(e) => setD('address', e.target.value)} />
+          <input value={d.ref} placeholder={s('Claim or registration number')} aria-label={s('Claim or registration number')} onChange={(e) => setD('ref', e.target.value)} />
         </div>
       </section>
 
       <section className="letter">
         <div className="sec-h noprint">
-          <span>Cover letter</span>
+          <span>{s('Cover letter')}</span>
           <button className="mini" onClick={write} disabled={busy || !canWrite}>
-            <Sparkles size={14} aria-hidden /> {busy ? 'Writing…' : letter ? 'Rewrite' : 'Write it for me'}
+            <Sparkles size={14} aria-hidden /> {busy ? s('Writing…') : letter ? s('Rewrite') : s('Write it for me')}
           </button>
         </div>
-        {!canWrite && !letter && <p className="muted noprint">Needs signal (with cloud AI on) or on-device AI. Your inventory below is ready either way.</p>}
+        {!canWrite && !letter && <p className="muted noprint">{s('Needs signal (with cloud AI on) or on-device AI. Your inventory below is ready either way.')}</p>}
         {err && <p className="err noprint">{err}</p>}
         {(draft || letter) && (
           <textarea
@@ -90,7 +91,7 @@ export function Packet(c: Ctx) {
             value={shown}
             readOnly={busy}
             rows={14}
-            aria-label="Cover letter"
+            aria-label={s('Cover letter')}
             onChange={(e) => c.setClaim((x) => ({ ...x, packet: { ...x.packet!, text: e.target.value } }))}
           />
         )}
@@ -99,7 +100,7 @@ export function Packet(c: Ctx) {
 
       <section className="inv">
         <div className="sec-h">
-          <span>Itemised inventory</span>
+          <span>{s('Itemised inventory')}</span>
           <span className="mono">{money(t.total)}</span>
         </div>
         {t.rooms
@@ -107,14 +108,14 @@ export function Packet(c: Ctx) {
           .map((r) => (
             <table key={r.room.id}>
               <caption>
-                <span>{r.room.name}</span>
+                <span>{s(r.room.name)}</span>
                 <span className="mono">{money(r.sum)}</span>
               </caption>
               <thead>
                 <tr>
-                  <th>Item</th>
-                  <th>Damage</th>
-                  <th className="r">Estimate</th>
+                  <th>{s('Item')}</th>
+                  <th>{s('Damage')}</th>
+                  <th className="r">{s('Estimate')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -122,9 +123,9 @@ export function Packet(c: Ctx) {
                   .filter((i) => i.roomId === r.room.id)
                   .map((i) => (
                     <tr key={i.id}>
-                      <td>{i.name || 'Unnamed item'}</td>
+                      <td>{i.name || s('Unnamed item')}</td>
                       <td>{i.damage}</td>
-                      <td className="r mono">{i.estimate === null ? 'TBD' : money(i.estimate)}</td>
+                      <td className="r mono">{i.estimate === null ? s('TBD') : money(i.estimate)}</td>
                     </tr>
                   ))}
               </tbody>
@@ -133,44 +134,44 @@ export function Packet(c: Ctx) {
         {c.claim.expenses.length > 0 && (
           <table>
             <caption>
-              <span>Extra costs</span>
+              <span>{s('Extra costs')}</span>
               <span className="mono">{money(t.costs)}</span>
             </caption>
             <thead>
               <tr>
-                <th>Cost</th>
-                <th>Date</th>
-                <th className="r">Amount</th>
+                <th>{s('Cost')}</th>
+                <th>{s('Date')}</th>
+                <th className="r">{s('Amount')}</th>
               </tr>
             </thead>
             <tbody>
               {c.claim.expenses.map((e) => (
                 <tr key={e.id}>
-                  <td>{e.what || 'Unnamed cost'}</td>
+                  <td>{e.what || s('Unnamed cost')}</td>
                   <td>{e.date}</td>
-                  <td className="r mono">{e.amount === null ? 'TBD' : money(e.amount)}</td>
+                  <td className="r mono">{e.amount === null ? s('TBD') : money(e.amount)}</td>
                 </tr>
               ))}
             </tbody>
           </table>
         )}
         <div className="grand">
-          <span>Total claimed</span>
+          <span>{s('Total claimed')}</span>
           <span className="mono">{money(t.total + t.costs)}</span>
         </div>
-        <p className="note">Estimates are approximate replacement costs, not appraisals. {t.unestimated ? `${t.unestimated} items still need an estimate.` : ''}</p>
+        <p className="note">{s('Estimates are approximate replacement costs, not appraisals.')} {t.unestimated ? s('{n} items still need an estimate.', { n: t.unestimated }) : ''}</p>
       </section>
 
       <section className="photos">
         <div className="sec-h">
-          <span>Photos</span>
+          <span>{s('Photos')}</span>
         </div>
         <div className="thumbs big">
           {c.claim.photos.map((p, n) => (
             <figure key={p.id}>
-              <Thumb id={p.id} alt={`Photo ${n + 1}`} />
+              <Thumb id={p.id} alt={s('Photo {n}', { n: n + 1 })} />
               <figcaption>
-                {n + 1}. {c.claim.rooms.find((r) => r.id === p.roomId)?.name} · {new Date(p.takenAt).toLocaleDateString()}
+                {n + 1}. {s(c.claim.rooms.find((r) => r.id === p.roomId)?.name ?? '')} · {new Date(p.takenAt).toLocaleDateString(locale())}
               </figcaption>
             </figure>
           ))}

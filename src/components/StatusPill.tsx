@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import type { Ctx } from '../App';
+import { s } from '../lib/i18n';
 
 /** Signal and AI state in one pill; tapping it opens where-the-AI-runs settings. */
 export function StatusPill(c: Ctx) {
@@ -7,7 +8,7 @@ export function StatusPill(c: Ctx) {
   const [dl, setDl] = useState<number | null>(null);
   const saved = c.claim.photos.length;
   const nano = c.status.device;
-  const label = !c.status.online ? `Offline · ${saved} saved` : nano === 'available' ? 'On-device AI' : 'Online';
+  const label = !c.status.online ? s('Offline · {n} saved', { n: saved }) : nano === 'available' ? s('On-device AI') : s('Online');
   const dot = !c.status.online ? 'amber' : nano === 'available' ? 'green' : 'blue';
 
   return (
@@ -17,24 +18,24 @@ export function StatusPill(c: Ctx) {
         {label}
       </button>
       {open && (
-        <div className="pop" role="dialog" aria-label="Where photos are read">
-          <p className="pop-h">Where your photos are read</p>
+        <div className="pop" role="dialog" aria-label={s('Where your photos are read')}>
+          <p className="pop-h">{s('Where your photos are read')}</p>
           <p>
-            Gemini Nano: <strong>{nano === 'available' ? 'ready on this device' : nano === 'downloadable' ? 'can be downloaded' : nano === 'downloading' ? 'downloading' : nano === 'stalled' ? 'not responding' : 'not available in this browser'}</strong>
+            Gemini Nano: <strong>{s(nano === 'available' ? 'ready on this device' : nano === 'downloadable' ? 'can be downloaded' : nano === 'downloading' ? 'downloading' : nano === 'stalled' ? 'not responding' : 'not available in this browser')}</strong>
           </p>
           {nano === 'downloadable' && (
             <button
               className="mini"
               onClick={() => c.enableNano((p) => setDl(Math.round(p * 100))).catch(() => setDl(null))}
             >
-              {dl === null ? 'Download on-device AI' : `Downloading ${dl}%`}
+              {dl === null ? s('Download on-device AI') : s('Downloading {n}%', { n: dl })}
             </button>
           )}
           <label className="chk">
             <input type="checkbox" checked={c.allowCloud} onChange={(e) => c.setAllowCloud(e.target.checked)} />
-            Use cloud AI when on-device AI isn't available
+            {s("Use cloud AI when on-device AI isn't available")}
           </label>
-          <p className="muted">With this off, photos never leave this device. Without on-device AI they wait here until you turn it on.</p>
+          <p className="muted">{s('With this off, photos never leave this device. Without on-device AI they wait here until you turn it on.')}</p>
         </div>
       )}
     </div>

@@ -1,0 +1,9 @@
+{
+  "name": "AidReady: document disaster damage, even offline",
+  "short_name": "AidReady",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#fbfbfa",
+  "theme_color": "#fbfbfa",
+  "icons": [{ "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }]
+}
