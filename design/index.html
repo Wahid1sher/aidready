@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>AidReady directions, round 2</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@500;700;800&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&display=swap" rel="stylesheet" />
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #e8e7e4; font-family: Inter, system-ui, sans-serif; color: #111; }
+  header.board { padding: 26px 32px 6px; }
+  header.board h1 { margin: 0; font: 700 24px Inter; }
+  header.board p { margin: 6px 0 0; color: #555; }
+  .row { display: flex; gap: 28px; padding: 22px 32px 48px; overflow-x: auto; }
+  .col { flex: none; width: 390px; }
+  .tag { font: 600 13px 'Geist Mono', monospace; letter-spacing: .06em; color: #555; margin: 0 0 10px; }
+  .tag b { color: #111; font-size: 18px; margin-right: 8px; }
+  .phone { width: 390px; height: 820px; border-radius: 44px; overflow: hidden; position: relative; box-shadow: 0 30px 60px rgba(0,0,0,.18), 0 0 0 10px #111; }
+  .cap { font-size: 14px; color: #444; margin: 22px 4px 0; line-height: 1.5; }
+
+  /* E: CLAIM DESK — fintech precision */
+  .e { background: #fbfbfa; color: #0b0d12; font-family: 'Geist', sans-serif; padding: 50px 20px 0; }
+  .e .top { display: flex; justify-content: space-between; align-items: center; }
+  .e .logo { display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 15px; }
+  .e .logo i { width: 22px; height: 22px; border-radius: 6px; background: #0b0d12; position: relative; }
+  .e .logo i::after { content: ''; position: absolute; inset: 6px; border-radius: 2px; background: #5b8cff; }
+  .e .off { font: 500 11px 'Geist Mono'; color: #6b7280; display: flex; align-items: center; gap: 6px; padding: 5px 9px; border: 1px solid #e5e7eb; border-radius: 999px; background: #fff; }
+  .e .off b { width: 6px; height: 6px; border-radius: 50%; background: #f59e0b; }
+  .e .lbl { margin: 26px 0 4px; font-size: 13px; color: #6b7280; }
+  .e .amt { font-size: 46px; font-weight: 600; letter-spacing: -.035em; }
+  .e .amt span { color: #9ca3af; font-weight: 500; }
+  .e .delta { display: inline-flex; gap: 6px; margin-top: 6px; font: 500 12px 'Geist Mono'; color: #16a34a; background: #f0fdf4; padding: 3px 8px; border-radius: 6px; }
+  .e .bar { display: flex; height: 10px; border-radius: 999px; overflow: hidden; margin: 22px 0 8px; background: #eef0f3; }
+  .e .bar i { display: block; height: 100%; }
+  .e .keys { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 14px; font-size: 12px; color: #4b5563; }
+  .e .keys span::before { content: ''; display: inline-block; width: 8px; height: 8px; border-radius: 2px; margin-right: 6px; background: var(--c); }
+  .e .card { margin-top: 20px; border: 1px solid #e5e7eb; border-radius: 14px; background: #fff; }
+  .e .ln { display: grid; grid-template-columns: 1fr auto auto; gap: 12px; align-items: center; padding: 13px 14px; border-top: 1px solid #f1f2f4; font-size: 14px; }
+  .e .ln:first-child { border-top: 0; }
+  .e .ln small { display: block; color: #6b7280; font-size: 12px; margin-top: 1px; }
+  .e .ln .m { font: 500 13px 'Geist Mono'; }
+  .e .st { font: 500 11px 'Geist Mono'; padding: 3px 7px; border-radius: 6px; }
+  .e .ok { color: #15803d; background: #f0fdf4; }
+  .e .nx { color: #1d4ed8; background: #eff6ff; }
+  .e .td { color: #6b7280; background: #f3f4f6; }
+  .e .dl { margin-top: 14px; display: flex; justify-content: space-between; align-items: center; padding: 14px; border-radius: 14px; background: #0b0d12; color: #fff; font-size: 13px; }
+  .e .dl b { font: 500 13px 'Geist Mono'; color: #fbbf24; }
+  .e .cta { position: absolute; left: 20px; right: 20px; bottom: 26px; display: flex; justify-content: center; gap: 8px; padding: 15px; border-radius: 12px; background: #2f6bff; color: #fff; font-weight: 600; font-size: 15px; }
+
+  /* F: NATIVE iOS */
+  .f { background: #f2f2f7; color: #000; font-family: -apple-system, 'Inter', sans-serif; padding: 50px 16px 0; }
+  .f .nav { display: flex; justify-content: space-between; font-size: 15px; color: #007aff; }
+  .f h2 { margin: 10px 4px 0; font-size: 34px; font-weight: 700; letter-spacing: -.02em; }
+  .f .ring { display: flex; align-items: center; gap: 16px; margin-top: 14px; padding: 16px; background: #fff; border-radius: 14px; }
+  .f .ring svg { flex: none; }
+  .f .ring b { display: block; font-size: 22px; }
+  .f .ring span { font-size: 13px; color: #8a8a8e; }
+  .f .gh { margin: 22px 16px 7px; font-size: 13px; color: #6d6d72; text-transform: uppercase; letter-spacing: .02em; }
+  .f .group { background: #fff; border-radius: 12px; overflow: hidden; }
+  .f .it { display: flex; align-items: center; gap: 12px; padding: 11px 14px; position: relative; font-size: 17px; }
+  .f .it + .it::before { content: ''; position: absolute; left: 56px; right: 0; top: 0; height: .5px; background: #c6c6c8; }
+  .f .ic { width: 30px; height: 30px; border-radius: 7px; display: grid; place-items: center; color: #fff; font-size: 15px; font-weight: 700; }
+  .f .it .r { margin-left: auto; color: #8a8a8e; font-size: 15px; }
+  .f .it .r.okc { color: #34c759; }
+  .f .it .r.lnk { color: #007aff; font-weight: 600; }
+  .f .tab { position: absolute; left: 0; right: 0; bottom: 0; height: 84px; background: rgba(249,249,249,.94); border-top: .5px solid #c6c6c8; display: flex; justify-content: space-around; padding-top: 8px; font-size: 10px; color: #8a8a8e; }
+  .f .tab div { text-align: center; }
+  .f .tab i { display: block; width: 26px; height: 22px; margin: 0 auto 3px; border-radius: 6px; background: #c7c7cc; }
+  .f .tab .on { color: #007aff; }
+  .f .tab .on i { background: #007aff; }
+
+  /* G: STORM TO CLEAR — weather-app glass */
+  .g { color: #fff; font-family: 'Plus Jakarta Sans', sans-serif; background: linear-gradient(180deg, #3b4a63 0%, #56708f 38%, #8fb0c9 72%, #d9c7a8 100%); padding: 56px 18px 0; }
+  .g .cloud { position: absolute; border-radius: 999px; background: rgba(255,255,255,.18); filter: blur(2px); }
+  .g .loc { text-align: center; font-size: 15px; font-weight: 500; opacity: .95; }
+  .g .big { text-align: center; font-size: 86px; font-weight: 300; letter-spacing: -.04em; line-height: 1; margin-top: 6px; }
+  .g .big small { font-size: 34px; }
+  .g .cond { text-align: center; font-size: 16px; font-weight: 500; }
+  .g .hl { text-align: center; font-size: 14px; opacity: .85; margin-top: 2px; }
+  .g .glass { margin-top: 16px; border-radius: 18px; padding: 12px 14px; background: rgba(255,255,255,.16); border: 1px solid rgba(255,255,255,.22); backdrop-filter: blur(16px); }
+  .g .gk { font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; opacity: .8; padding-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,.2); margin-bottom: 8px; }
+  .g .hours { display: flex; justify-content: space-between; text-align: center; font-size: 13px; }
+  .g .hours b { display: block; font-size: 15px; margin-top: 6px; }
+  .g .hours i { display: block; width: 22px; height: 22px; margin: 6px auto 0; border-radius: 50%; background: rgba(255,255,255,.9); }
+  .g .hours i.p { background: none; border: 2px solid rgba(255,255,255,.7); }
+  .g .hours i.n { background: #ffd56b; box-shadow: 0 0 0 4px rgba(255,213,107,.3); }
+  .g .rw { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; font-size: 15px; }
+  .g .rw + .rw { border-top: 1px solid rgba(255,255,255,.18); }
+  .g .meter { width: 110px; height: 5px; border-radius: 3px; background: rgba(255,255,255,.25); position: relative; }
+  .g .meter i { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 3px; background: linear-gradient(90deg, #8fd3ff, #ffd56b); }
+
+  /* H: BENTO */
+  .h { background: #f6f5f2; color: #16161a; font-family: 'DM Sans', sans-serif; padding: 50px 14px 0; }
+  .h .top { display: flex; justify-content: space-between; align-items: center; padding: 0 4px; }
+  .h .top b { font-size: 20px; letter-spacing: -.02em; }
+  .h .top span { font-size: 12px; padding: 5px 10px; border-radius: 999px; background: #16161a; color: #f6f5f2; }
+  .h .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 16px; }
+  .h .t { border-radius: 22px; padding: 14px; position: relative; overflow: hidden; }
+  .h .t small { font-size: 12px; font-weight: 500; opacity: .75; }
+  .h .t b { display: block; font-weight: 700; letter-spacing: -.03em; }
+  .h .t1 { grid-column: span 2; background: #c9f06b; height: 150px; }
+  .h .t1 b { font-size: 52px; margin-top: 18px; }
+  .h .t1 .spark { position: absolute; right: 14px; bottom: 14px; width: 140px; height: 60px; }
+  .h .t2 { background: #16161a; color: #fff; height: 140px; }
+  .h .t2 b { font-size: 44px; margin-top: 22px; }
+  .h .t3 { background: #ffb86b; height: 140px; }
+  .h .t3 b { font-size: 44px; margin-top: 22px; }
+  .h .t4 { grid-column: span 2; background: #fff; }
+  .h .rooms { display: flex; gap: 6px; margin-top: 10px; }
+  .h .rooms div { flex: 1; height: 54px; border-radius: 12px; display: flex; align-items: flex-end; padding: 6px; font-size: 11px; font-weight: 700; }
+  .h .r1 { background: #c9f06b; } .h .r2 { background: #c9f06b; } .h .r3 { background: repeating-linear-gradient(135deg, #ffe2c0 0 6px, #ffd2a0 6px 12px); } .h .r4, .h .r5 { background: #eeece7; color: #8a8780; }
+  .h .t5 { grid-column: span 2; background: #7c6cff; color: #fff; display: flex; justify-content: space-between; align-items: center; }
+  .h .t5 b { font-size: 18px; letter-spacing: -.01em; }
+  .h .t5 i { width: 44px; height: 44px; border-radius: 50%; background: #fff; display: grid; place-items: center; color: #7c6cff; font-style: normal; font-weight: 700; font-size: 20px; }
+</style>
+</head>
+<body>
+<header class="board">
+  <h1>AidReady: four new directions</h1>
+  <p>Same fictional claim after a storm. Pick one, or tell me what to mix. Round 1 is at /v1.html.</p>
+</header>
+<div class="row">
+
+<div class="col">
+  <p class="tag"><b>E</b> CLAIM DESK</p>
+  <div class="phone e">
+    <div class="top"><div class="logo"><i></i>AidReady</div><div class="off"><b></b>Offline · 23 saved</div></div>
+    <p class="lbl">Documented damage</p>
+    <div class="amt">$7,940<span>.00</span></div>
+    <div class="delta">+ $2,870 kitchen, today</div>
+    <div class="bar"><i style="width:52%;background:#2f6bff"></i><i style="width:36%;background:#7aa2ff"></i><i style="width:12%;background:#c7d6ff"></i></div>
+    <div class="keys"><span style="--c:#2f6bff">Living room $4,120</span><span style="--c:#7aa2ff">Kitchen $2,870</span><span style="--c:#c7d6ff">Exterior $950</span><span style="--c:#eef0f3">Bedroom, garage</span></div>
+    <div class="card">
+      <div class="ln"><div>Living room<small>9 items · 14 photos</small></div><span class="m">$4,120</span><span class="st ok">Done</span></div>
+      <div class="ln"><div>Kitchen<small>7 items · 11 photos</small></div><span class="m">$2,870</span><span class="st ok">Done</span></div>
+      <div class="ln"><div>Bedroom<small>Not started</small></div><span class="m">—</span><span class="st nx">Next</span></div>
+      <div class="ln"><div>Garage<small>Not started</small></div><span class="m">—</span><span class="st td">To do</span></div>
+    </div>
+    <div class="dl"><span>Aid application closes</span><b>54 days · Jan 8</b></div>
+    <div class="cta">Scan bedroom</div>
+  </div>
+  <p class="cap">Fintech precision, like Stripe or Linear: one big number, a clean value breakdown, status tags, monospace figures. Looks like serious, trustworthy software.</p>
+</div>
+
+<div class="col">
+  <p class="tag"><b>F</b> NATIVE iOS</p>
+  <div class="phone f">
+    <div class="nav"><span>&#8249; Claims</span><span>Share</span></div>
+    <h2>Home claim</h2>
+    <div class="ring">
+      <svg width="64" height="64" viewBox="0 0 64 64"><circle cx="32" cy="32" r="26" fill="none" stroke="#e5e5ea" stroke-width="8"/><circle cx="32" cy="32" r="26" fill="none" stroke="#34c759" stroke-width="8" stroke-linecap="round" stroke-dasharray="65 164" transform="rotate(-90 32 32)"/><circle cx="32" cy="32" r="15" fill="none" stroke="#e5e5ea" stroke-width="6"/><circle cx="32" cy="32" r="15" fill="none" stroke="#ff9500" stroke-width="6" stroke-linecap="round" stroke-dasharray="10 94" transform="rotate(-90 32 32)"/></svg>
+      <div><b>$7,940 documented</b><span>2 of 5 rooms · 54 days to apply</span></div>
+    </div>
+    <p class="gh">Rooms</p>
+    <div class="group">
+      <div class="it"><span class="ic" style="background:#34c759">L</span>Living room<span class="r okc">9 items &#10003;</span></div>
+      <div class="it"><span class="ic" style="background:#34c759">K</span>Kitchen<span class="r okc">7 items &#10003;</span></div>
+      <div class="it"><span class="ic" style="background:#007aff">B</span>Bedroom<span class="r lnk">Scan</span></div>
+      <div class="it"><span class="ic" style="background:#aeaeb2">G</span>Garage<span class="r">&#8250;</span></div>
+    </div>
+    <p class="gh">Status</p>
+    <div class="group">
+      <div class="it"><span class="ic" style="background:#ff9500">!</span>No signal<span class="r">Saved on iPhone</span></div>
+      <div class="it"><span class="ic" style="background:#5856d6">D</span>Claim packet<span class="r">Sends later</span></div>
+    </div>
+    <div class="tab"><div class="on"><i></i>Claim</div><div><i></i>Scan</div><div><i></i>Deadlines</div><div><i></i>Help</div></div>
+  </div>
+  <p class="cap">Feels like Apple made it: grouped lists, coloured icon tiles, Activity-style progress rings. Instantly familiar, very polished, zero learning curve.</p>
+</div>
+
+<div class="col">
+  <p class="tag"><b>G</b> STORM TO CLEAR</p>
+  <div class="phone g">
+    <i class="cloud" style="width:180px;height:50px;left:-30px;top:120px"></i><i class="cloud" style="width:140px;height:40px;right:-20px;top:70px"></i>
+    <div class="loc">Home claim · Storm Delia</div>
+    <div class="big">40<small>%</small></div>
+    <div class="cond">Clearing up</div>
+    <div class="hl">$7,940 documented · 54 days to apply</div>
+    <div class="glass">
+      <div class="gk">Your rooms</div>
+      <div class="hours"><div>Living<i></i><b>9</b></div><div>Kitchen<i></i><b>7</b></div><div>Bedroom<i class="n"></i><b>Next</b></div><div>Garage<i class="p"></i><b>—</b></div><div>Yard<i class="p"></i><b>—</b></div></div>
+    </div>
+    <div class="glass">
+      <div class="gk">Damage by room</div>
+      <div class="rw">Living room<div class="meter"><i style="width:100%"></i></div>$4,120</div>
+      <div class="rw">Kitchen<div class="meter"><i style="width:70%"></i></div>$2,870</div>
+      <div class="rw">Exterior<div class="meter"><i style="width:24%"></i></div>$950</div>
+    </div>
+    <div class="glass"><div class="gk">Connection</div><div class="rw" style="border:0">No signal<span style="opacity:.85">23 items safe on this phone</span></div></div>
+  </div>
+  <p class="cap">Like Apple Weather: glass cards over a storm sky that clears as your claim progresses. Familiar, beautiful, and emotionally right for a disaster app.</p>
+</div>
+
+<div class="col">
+  <p class="tag"><b>H</b> BENTO</p>
+  <div class="phone h">
+    <div class="top"><b>AidReady</b><span>&#9679; Offline</span></div>
+    <div class="grid">
+      <div class="t t1"><small>Damage documented</small><b>$7,940</b>
+        <svg class="spark" viewBox="0 0 140 60"><polyline points="0,52 30,46 60,30 90,22 120,10 140,6" fill="none" stroke="#16161a" stroke-width="3" stroke-linecap="round"/></svg></div>
+      <div class="t t2"><small>Items found</small><b>23</b></div>
+      <div class="t t3"><small>Days to apply</small><b>54</b></div>
+      <div class="t t4"><small>Rooms · 2 of 5</small>
+        <div class="rooms"><div class="r1">Living</div><div class="r2">Kitchen</div><div class="r3">Bed</div><div class="r4">Garage</div><div class="r5">Yard</div></div></div>
+      <div class="t t5"><div><small>Up next</small><b>Scan the bedroom</b></div><i>&#8594;</i></div>
+    </div>
+  </div>
+  <p class="cap">Modern bento tiles in bold colours: every key fact gets its own block. Energetic and contemporary, like a well-designed dashboard app.</p>
+</div>
+
+</div>
+</body>
+</html>

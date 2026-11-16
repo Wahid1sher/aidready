@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>AidReady directions</title>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400;62..125,700;62..125,900&family=JetBrains+Mono:wght@500;700&family=IBM+Plex+Sans:wght@400;600&family=IBM+Plex+Mono:wght@400;600&family=Newsreader:opsz,wght@6..72,400;6..72,600&family=Inter:wght@400;600;700&family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet" />
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #e6e4df; font-family: Inter, system-ui, sans-serif; color: #111; }
+  header.board { padding: 26px 32px 6px; }
+  header.board h1 { margin: 0; font: 700 24px Inter; }
+  header.board p { margin: 6px 0 0; color: #555; }
+  .row { display: flex; gap: 28px; padding: 22px 32px 48px; overflow-x: auto; }
+  .col { flex: none; width: 390px; }
+  .tag { font: 700 13px 'JetBrains Mono', monospace; letter-spacing: .06em; color: #555; margin: 0 0 10px; }
+  .tag b { color: #111; font-size: 18px; margin-right: 8px; }
+  .phone { width: 390px; height: 820px; border-radius: 44px; overflow: hidden; position: relative; box-shadow: 0 30px 60px rgba(0,0,0,.18), 0 0 0 10px #111; }
+  .cap { font-size: 14px; color: #444; margin: 22px 4px 0; line-height: 1.5; }
+
+  /* A: FIELD KIT — rugged emergency gear */
+  .a { background: #1b1c1e; color: #f2f0ea; font-family: 'Archivo', sans-serif; }
+  .a .bar { display: flex; justify-content: space-between; align-items: center; padding: 50px 20px 12px; font: 700 11px 'JetBrains Mono'; letter-spacing: .1em; }
+  .a .sig { display: flex; align-items: center; gap: 8px; color: #ffd400; }
+  .a .sig i { width: 8px; height: 8px; border-radius: 50%; background: #ffd400; box-shadow: 0 0 0 4px rgba(255,212,0,.2); }
+  .a .hero { margin: 4px 14px 0; background: #ffd400; color: #111; border-radius: 6px; padding: 16px 16px 14px; position: relative; overflow: hidden; }
+  .a .hero::after { content: ''; position: absolute; right: -30px; top: 0; bottom: 0; width: 120px; background: repeating-linear-gradient(-45deg, #111 0 12px, transparent 12px 24px); opacity: .9; clip-path: polygon(40% 0, 100% 0, 100% 100%, 0 100%); }
+  .a .hero small { font: 700 11px 'JetBrains Mono'; letter-spacing: .12em; }
+  .a .hero .big { font-stretch: 75%; font-weight: 900; font-size: 64px; line-height: .9; letter-spacing: -.02em; margin-top: 6px; }
+  .a .hero .big span { font-size: 22px; letter-spacing: 0; }
+  .a .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 10px 14px 0; }
+  .a .stat { border: 1.5px solid #3a3c40; border-radius: 6px; padding: 10px 12px; }
+  .a .stat b { display: block; font-stretch: 75%; font-weight: 900; font-size: 30px; }
+  .a .stat span { font: 500 10px 'JetBrains Mono'; letter-spacing: .1em; color: #a9a59a; }
+  .a .rooms { margin: 12px 14px 0; }
+  .a .room { display: grid; grid-template-columns: 26px 1fr auto; align-items: center; gap: 10px; padding: 12px 4px; border-bottom: 1px solid #333; font-weight: 700; font-size: 16px; }
+  .a .room .n { font: 700 11px 'JetBrains Mono'; color: #a9a59a; }
+  .a .room .v { font: 700 12px 'JetBrains Mono'; }
+  .a .room.done .v { color: #9be37a; }
+  .a .room.next { background: #2a2b2e; border-radius: 6px; border-bottom-color: transparent; }
+  .a .room.next .v { color: #ffd400; }
+  .a .cta { position: absolute; left: 14px; right: 14px; bottom: 26px; display: flex; justify-content: space-between; align-items: center; background: #f2f0ea; color: #111; border-radius: 6px; padding: 18px; font-stretch: 80%; font-weight: 900; font-size: 20px; text-transform: uppercase; }
+  .a .cta i { font: 700 11px 'JetBrains Mono'; font-style: normal; background: #111; color: #ffd400; padding: 5px 8px; border-radius: 3px; }
+
+  /* B: BLUEPRINT — the home as a drawing */
+  .b { background: #0f2c4c; color: #dbe8f5; font-family: 'IBM Plex Sans', sans-serif; background-image: linear-gradient(rgba(255,255,255,.06) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.06) 1px, transparent 1px); background-size: 20px 20px; }
+  .b .top { padding: 50px 22px 0; display: flex; justify-content: space-between; font: 600 11px 'IBM Plex Mono'; letter-spacing: .08em; color: #8fb3d9; }
+  .b h2 { margin: 14px 22px 0; font: 600 26px 'IBM Plex Sans'; color: #fff; letter-spacing: -.01em; }
+  .b .sub { margin: 4px 22px 0; font: 400 13px 'IBM Plex Mono'; color: #8fb3d9; }
+  .b svg { display: block; margin: 16px auto 0; }
+  .b .legend { display: flex; gap: 14px; justify-content: center; font: 400 11px 'IBM Plex Mono'; color: #8fb3d9; margin-top: 6px; }
+  .b .legend i { display: inline-block; width: 10px; height: 10px; margin-right: 5px; vertical-align: -1px; }
+  .b .panel { position: absolute; left: 12px; right: 12px; bottom: 14px; background: #f4f7fb; color: #0f2c4c; border-radius: 18px; padding: 16px 18px; }
+  .b .panel .k { font: 600 11px 'IBM Plex Mono'; letter-spacing: .1em; color: #3c6ea3; }
+  .b .panel h3 { margin: 6px 0 4px; font: 600 20px 'IBM Plex Sans'; }
+  .b .panel p { margin: 0; font-size: 13px; color: #4a6283; }
+  .b .panel .go { margin-top: 12px; display: flex; gap: 8px; }
+  .b .panel .go b { flex: 1; text-align: center; background: #0f2c4c; color: #fff; border-radius: 12px; padding: 13px; font-size: 15px; }
+  .b .panel .go span { padding: 13px 14px; border: 1.5px solid #0f2c4c; border-radius: 12px; font: 600 12px 'IBM Plex Mono'; }
+
+  /* C: AFTER THE STORM — calm editorial */
+  .c { background: #f3efe7; color: #23201b; font-family: 'Inter', sans-serif; }
+  .c .top { padding: 50px 24px 0; display: flex; justify-content: space-between; font-size: 12px; color: #7d7466; }
+  .c .top b { color: #23201b; }
+  .c h2 { margin: 18px 24px 0; font: 400 34px/1.08 'Newsreader', serif; letter-spacing: -.01em; }
+  .c h2 em { font-style: italic; color: #8a5a2b; }
+  .c .lede { margin: 10px 24px 0; font-size: 14px; color: #5b5346; line-height: 1.5; }
+  .c .photos { display: grid; grid-template-columns: 1.3fr 1fr; grid-template-rows: 92px 92px; gap: 6px; margin: 18px 24px 0; }
+  .c .ph { border-radius: 10px; position: relative; overflow: hidden; }
+  .c .ph span { position: absolute; left: 8px; bottom: 6px; font-size: 11px; color: #fff; font-weight: 600; text-shadow: 0 1px 4px rgba(0,0,0,.5); }
+  .c .p1 { grid-row: span 2; background: linear-gradient(160deg, #8e9aa6, #5f6b75 55%, #4a4237 56%, #6b5c47); }
+  .c .p2 { background: linear-gradient(160deg, #c6b49a, #9f8a6c 60%, #6f604c 61%); }
+  .c .p3 { background: linear-gradient(160deg, #a7b4bd, #77858f 50%, #5d564b 51%); }
+  .c .list { margin: 18px 24px 0; border-top: 1px solid #d9d0c2; }
+  .c .li { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #d9d0c2; font-size: 15px; }
+  .c .li small { display: block; color: #7d7466; font-size: 12px; margin-top: 2px; }
+  .c .li b { font: 600 16px 'Newsreader', serif; }
+  .c .note { position: absolute; left: 24px; right: 24px; bottom: 26px; display: flex; gap: 12px; align-items: center; background: #23201b; color: #f3efe7; border-radius: 16px; padding: 16px 18px; }
+  .c .note .d { font: 600 30px 'Newsreader', serif; color: #e8b77a; }
+  .c .note p { margin: 0; font-size: 13px; line-height: 1.4; }
+
+  /* D: SIGNAL — dark, the connectivity story */
+  .d { background: radial-gradient(120% 70% at 50% 0%, #17213a 0%, #0a0e18 60%); color: #e7ecf7; font-family: 'Space Grotesk', sans-serif; }
+  .d .top { padding: 50px 22px 0; display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: #8a96b3; }
+  .d .pill { display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: 999px; background: rgba(255,120,90,.12); color: #ff9b7f; font-weight: 600; }
+  .d .radar { position: relative; width: 250px; height: 250px; margin: 22px auto 0; border-radius: 50%; background: radial-gradient(circle, rgba(110,231,183,.0) 0 30%, transparent 30%), repeating-radial-gradient(circle, rgba(140,160,210,.18) 0 1px, transparent 1px 40px); }
+  .d .radar::after { content: ''; position: absolute; inset: 0; border-radius: 50%; background: conic-gradient(from 20deg, rgba(110,231,183,.35), transparent 25%); }
+  .d .core { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; z-index: 1; }
+  .d .core b { display: block; font-size: 54px; font-weight: 700; letter-spacing: -.03em; }
+  .d .core span { font-size: 12px; color: #8a96b3; letter-spacing: .08em; }
+  .d .dot { position: absolute; width: 8px; height: 8px; border-radius: 50%; background: #6ee7b7; z-index: 1; }
+  .d h2 { text-align: center; margin: 18px 30px 0; font-size: 20px; font-weight: 600; }
+  .d .sub { text-align: center; margin: 6px 34px 0; font-size: 13px; color: #8a96b3; line-height: 1.5; }
+  .d .queue { margin: 18px 18px 0; display: flex; flex-direction: column; gap: 8px; }
+  .d .q { display: flex; justify-content: space-between; align-items: center; padding: 12px 14px; border-radius: 14px; background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.07); font-size: 14px; }
+  .d .q span { font-size: 12px; color: #6ee7b7; }
+  .d .q.wait span { color: #8a96b3; }
+  .d .cta { position: absolute; left: 18px; right: 18px; bottom: 26px; text-align: center; padding: 17px; border-radius: 16px; background: #6ee7b7; color: #0a0e18; font-weight: 700; font-size: 16px; }
+</style>
+</head>
+<body>
+<header class="board">
+  <h1>AidReady: four directions for the claim home screen</h1>
+  <p>Same fictional claim after a storm. Pick one, or tell me what to mix.</p>
+</header>
+<div class="row">
+
+<div class="col">
+  <p class="tag"><b>A</b> FIELD KIT</p>
+  <div class="phone a">
+    <div class="bar"><span>AIDREADY // CLAIM 01</span><span class="sig"><i></i> NO SIGNAL · SAVED</span></div>
+    <div class="hero"><small>DAMAGE DOCUMENTED</small><div class="big">$7,940<span> est.</span></div></div>
+    <div class="stats">
+      <div class="stat"><b>23</b><span>ITEMS FOUND</span></div>
+      <div class="stat"><b>54 d</b><span>TO AID DEADLINE</span></div>
+    </div>
+    <div class="rooms">
+      <div class="room done"><span class="n">01</span>Living room<span class="v">9 · DONE</span></div>
+      <div class="room done"><span class="n">02</span>Kitchen<span class="v">7 · DONE</span></div>
+      <div class="room next"><span class="n">03</span>Bedroom<span class="v">NEXT</span></div>
+      <div class="room"><span class="n">04</span>Garage<span class="v">—</span></div>
+      <div class="room"><span class="n">05</span>Exterior<span class="v">—</span></div>
+    </div>
+    <div class="cta">Scan bedroom <i>WORKS OFFLINE</i></div>
+  </div>
+  <p class="cap">Rugged emergency gear: hazard yellow, condensed type, numbers first. Feels like a tool you'd trust in a flood. Bold and unmistakable.</p>
+</div>
+
+<div class="col">
+  <p class="tag"><b>B</b> BLUEPRINT</p>
+  <div class="phone b">
+    <div class="top"><span>CLAIM 01 · HOME</span><span>&#9675; OFFLINE · 23 SAVED</span></div>
+    <h2>Your home, room by room</h2>
+    <div class="sub">2 of 5 rooms documented</div>
+    <svg width="330" height="300" viewBox="0 0 330 300" aria-hidden="true">
+      <g fill="none" stroke="#dbe8f5" stroke-width="2">
+        <rect x="10" y="10" width="190" height="140" fill="rgba(110,231,183,.22)"/>
+        <rect x="200" y="10" width="120" height="140" fill="rgba(110,231,183,.22)"/>
+        <rect x="10" y="150" width="150" height="140" fill="rgba(255,212,90,.25)" stroke="#ffd45a" stroke-width="3"/>
+        <rect x="160" y="150" width="90" height="140"/>
+        <rect x="250" y="150" width="70" height="140" stroke-dasharray="6 5"/>
+      </g>
+      <g font-family="IBM Plex Mono" font-size="11" fill="#dbe8f5">
+        <text x="22" y="32">LIVING ROOM</text><text x="22" y="50" fill="#6ee7b7">9 items · $4,120</text>
+        <text x="212" y="32">KITCHEN</text><text x="212" y="50" fill="#6ee7b7">7 · $2,870</text>
+        <text x="22" y="172" fill="#ffd45a">BEDROOM</text><text x="22" y="190" fill="#ffd45a">scan next</text>
+        <text x="172" y="172">GARAGE</text><text x="258" y="172">YARD</text>
+      </g>
+      <path d="M150 150 a20 20 0 0 1 20 -20" stroke="#dbe8f5" fill="none"/>
+    </svg>
+    <div class="legend"><span><i style="background:rgba(110,231,183,.6)"></i>done</span><span><i style="background:#ffd45a"></i>next</span><span><i style="border:1px dashed #dbe8f5"></i>not started</span></div>
+    <div class="panel">
+      <div class="k">NEXT · BEDROOM</div>
+      <h3>Walk the room slowly</h3>
+      <p>On-device AI lists what's damaged as you take photos. No signal needed.</p>
+      <div class="go"><b>Start scanning</b><span>54 days left</span></div>
+    </div>
+  </div>
+  <p class="cap">Your home as an architect's drawing. Rooms fill in as you document them. Instantly shows progress and what's left. Precise and technical.</p>
+</div>
+
+<div class="col">
+  <p class="tag"><b>C</b> AFTER THE STORM</p>
+  <div class="phone c">
+    <div class="top"><span><b>AidReady</b> · Your claim</span><span>Saved on this phone</span></div>
+    <h2>You've documented <em>$7,940</em> of damage.</h2>
+    <p class="lede">Two rooms done, three to go. Take your time; everything is saved here until you're back online.</p>
+    <div class="photos">
+      <div class="ph p1"><span>Living room · 9 items</span></div>
+      <div class="ph p2"><span>Kitchen · 7</span></div>
+      <div class="ph p3"><span>Bedroom · next</span></div>
+    </div>
+    <div class="list">
+      <div class="li"><div>Sofa, three-seat<small>Water line at 14 in · living room</small></div><b>$1,200</b></div>
+      <div class="li"><div>Refrigerator<small>Submerged · kitchen</small></div><b>$1,450</b></div>
+    </div>
+    <div class="note"><span class="d">54</span><p>days left to apply for disaster aid. We'll remind you, and finish your packet when you're back online.</p></div>
+  </div>
+  <p class="cap">Calm, humane, editorial. Serif headlines, photos first, a gentle voice for people having the worst week of their lives. Warm and trustworthy.</p>
+</div>
+
+<div class="col">
+  <p class="tag"><b>D</b> SIGNAL</p>
+  <div class="phone d">
+    <div class="top"><span>AidReady</span><span class="pill">&#9679; No signal</span></div>
+    <div class="radar">
+      <div class="core"><div><b>23</b><span>ITEMS SAVED ON THIS PHONE</span></div></div>
+      <i class="dot" style="left:60px;top:70px"></i><i class="dot" style="left:180px;top:52px"></i><i class="dot" style="left:200px;top:170px"></i><i class="dot" style="left:44px;top:160px"></i>
+    </div>
+    <h2>Everything is safe here</h2>
+    <p class="sub">When your signal returns, AidReady sends your claim packet and checks the deadline. Nothing to do now.</p>
+    <div class="queue">
+      <div class="q">Living room · 9 items<span>ready</span></div>
+      <div class="q">Kitchen · 7 items<span>ready</span></div>
+      <div class="q wait">Claim packet · 2 pages<span>waiting for signal</span></div>
+    </div>
+    <div class="cta">Scan the next room</div>
+  </div>
+  <p class="cap">Dark and atmospheric. Turns "no signal" into the hero: a radar of everything saved, a queue that sends itself later. Shows the hybrid story at a glance.</p>
+</div>
+
+</div>
+</body>
+</html>
