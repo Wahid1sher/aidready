@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import type { Ctx } from '../App';
 import { s } from '../lib/i18n';
+import { clearStall } from '../services/hybridAi';
 
 /** Signal and AI state in one pill; tapping it opens where-the-AI-runs settings. */
 export function StatusPill(c: Ctx) {
@@ -23,6 +24,11 @@ export function StatusPill(c: Ctx) {
           <p>
             Gemini Nano: <strong>{s(nano === 'available' ? 'ready on this device' : nano === 'downloadable' ? 'can be downloaded' : nano === 'downloading' ? 'downloading' : nano === 'stalled' ? 'not responding' : 'not available in this browser')}</strong>
           </p>
+          {nano === 'stalled' && (
+            <button className="mini" onClick={clearStall}>
+              {s('Try again')}
+            </button>
+          )}
           {nano === 'downloadable' && (
             <button
               className="mini"

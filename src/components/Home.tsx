@@ -224,6 +224,10 @@ export function Home(c: Ctx) {
         )}
       </section>
 
+      <button className="tour-link" onClick={c.showTutorial}>
+        {s('How AidReady works')}
+      </button>
+
       <p className="note">{s('Estimates are replacement-cost estimates to help you fill in your claim, not appraisals. Check each one.')}</p>
 
       {t.next && (

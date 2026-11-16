@@ -1,6 +1,7 @@
 import { ArrowLeft, Camera, Check, Cpu, Cloud, Images, Plus, Trash2 } from 'lucide-react';
 import type { Ctx } from '../App';
 import { s } from '../lib/i18n';
+import { clearStall } from '../services/hybridAi';
 import { deletePhoto, money, uid, type Item } from '../lib/claim';
 import { Thumb } from './Thumb';
 
@@ -73,6 +74,11 @@ export function RoomView(c: Ctx & { roomId: string }) {
             : c.canRead
               ? s('{n} photos waiting', { n: waiting })
               : s("{n} photos saved on this device. They'll be read when you have signal or on-device AI.", { n: waiting })}
+          {!c.scanning && !c.canRead && c.status.device === 'stalled' && (
+            <button className="mini" onClick={clearStall}>
+              {s('Try again')}
+            </button>
+          )}
           {!c.scanning && c.canRead && (
             <button className="mini" onClick={c.drain}>
               {s('Read now')}

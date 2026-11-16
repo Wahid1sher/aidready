@@ -8,6 +8,9 @@ import { RoomView } from './components/RoomView';
 import { Packet } from './components/Packet';
 import { Costs } from './components/Costs';
 import { Checkup } from './components/Checkup';
+import { Welcome } from './components/Welcome';
+
+const WELCOMED_KEY = 'ar:welcomed';
 
 export type View = { name: 'home' } | { name: 'room'; id: string } | { name: 'packet' } | { name: 'costs' } | { name: 'checkup' };
 
@@ -19,6 +22,22 @@ export default function App() {
   const [status, setStatus] = useState<HybridStatus>({ online: navigator.onLine, device: 'unsupported' });
   const [allowCloud, setAllowCloud] = useState(() => localStorage.getItem(CLOUD_KEY) !== 'false');
   const [lang, setLangState] = useState<Lang>(getLang);
+  const [welcome, setWelcome] = useState(() => {
+    try {
+      return localStorage.getItem(WELCOMED_KEY) !== '1';
+    } catch {
+      return true;
+    }
+  });
+  const finishWelcome = () => {
+    try {
+      localStorage.setItem(WELCOMED_KEY, '1');
+    } catch {
+      /* storage blocked: shows again next visit */
+    }
+    setWelcome(false);
+    setView({ name: 'home' });
+  };
   const [scanning, setScanning] = useState<string | null>(null);
   const [error, setError] = useState('');
   const busy = useRef(false);
@@ -101,16 +120,21 @@ export default function App() {
     setView({ name: 'home' });
   };
 
-  const ctx = { claim, setClaim, replaceClaim, status, allowCloud, setAllowCloud, lang, changeLang, scanning, error, canRead, setView, addPhotos, drain, enableNano: enableOnDevice };
+  const ctx = { claim, setClaim, replaceClaim, status, allowCloud, setAllowCloud, lang, changeLang, showTutorial: () => setWelcome(true), scanning, error, canRead, setView, addPhotos, drain, enableNano: enableOnDevice };
 
   return (
     // key={lang} re-renders every screen when the language changes.
     <div className="app" key={lang}>
+      {welcome && <Welcome lang={lang} changeLang={changeLang} onDone={finishWelcome} />}
+      {!welcome && (
+        <>
       {view.name === 'home' && <Home {...ctx} />}
       {view.name === 'room' && <RoomView {...ctx} roomId={view.id} />}
       {view.name === 'packet' && <Packet {...ctx} />}
       {view.name === 'costs' && <Costs {...ctx} />}
       {view.name === 'checkup' && <Checkup {...ctx} />}
+        </>
+      )}
     </div>
   );
 }
@@ -124,6 +148,7 @@ export type Ctx = {
   setAllowCloud: (v: boolean) => void;
   lang: Lang;
   changeLang: (l: Lang) => void;
+  showTutorial: () => void;
   scanning: string | null;
   error: string;
   canRead: boolean;

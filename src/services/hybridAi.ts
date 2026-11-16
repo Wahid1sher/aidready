@@ -34,7 +34,7 @@ export type DeviceState = 'available' | 'downloadable' | 'downloading' | 'unavai
 
 export class OnDeviceTimeoutError extends Error {
   constructor(seconds: number) {
-    super(`Gemini Nano did not respond within ${seconds}s. Restarting Chrome usually fixes this.`);
+    super(`Gemini Nano did not respond within ${seconds}s. Tap Try again; restarting Chrome helps if it keeps happening.`);
     this.name = 'OnDeviceTimeoutError';
   }
 }
@@ -58,18 +58,31 @@ function markStalled() {
   stalled = true;
   stallListeners.forEach((cb) => cb());
 }
+/** Nano answered (or the person asked to retry): stop treating it as stalled. */
+export function clearStall() {
+  if (!stalled) return;
+  stalled = false;
+  stallListeners.forEach((cb) => cb());
+}
+
+// The first image call loads Nano's vision model, which took ~60s in testing; later calls take ~12s.
+const IMAGE_TIMEOUT_MS = 150_000;
 
 /** Resolves with the promise, or rejects if no progress is reported within the on-device budget. */
-function guard<T>(mode: Mode, run: (progress: () => void) => Promise<T>): Promise<T> {
+function guard<T>(mode: Mode, run: (progress: () => void) => Promise<T>, budgetMs = onDeviceTimeoutMs): Promise<T> {
   if (mode === 'only_in_cloud') return run(() => {});
   return new Promise<T>((resolve, reject) => {
     let timer: ReturnType<typeof setTimeout>;
+    let timedOut = false;
     const arm = () => {
+      // A call that already timed out can keep streaming; it must not re-arm and mark Nano stalled again.
+      if (timedOut) return;
       clearTimeout(timer);
       timer = setTimeout(() => {
+        timedOut = true;
         markStalled();
-        reject(new OnDeviceTimeoutError(Math.round(onDeviceTimeoutMs / 1000)));
-      }, onDeviceTimeoutMs);
+        reject(new OnDeviceTimeoutError(Math.round(budgetMs / 1000)));
+      }, budgetMs);
     };
     arm();
     run(arm).then(
@@ -181,9 +194,11 @@ export function parseJSON<T>(text: string): T {
 /** One structured call. */
 export async function generateJSON<T>(task: string, prompt: string | (string | Part)[], o: ModelOptions): Promise<CallResult<T>> {
   const t0 = performance.now();
-  const res = await guard(o.mode, () => buildModel(o).generateContent(prompt));
+  const res = await guard(o.mode, () => buildModel(o).generateContent(prompt), o.image ? IMAGE_TIMEOUT_MS : undefined);
+  const where = whereFrom(res.response.inferenceSource, o.mode);
+  if (where === 'on-device') clearStall();
   const data = parseJSON<T>(res.response.text());
-  return { data, where: whereFrom(res.response.inferenceSource, o.mode), ms: Math.round(performance.now() - t0) };
+  return { data, where, ms: Math.round(performance.now() - t0) };
 }
 
 /** One free-text call, streamed. */
@@ -204,8 +219,10 @@ export async function generateText(
       onChunk(text);
     }
     return res.response;
-  });
-  return { data: text, where: whereFrom(final.inferenceSource, o.mode), ms: Math.round(performance.now() - t0) };
+  }, o.image ? IMAGE_TIMEOUT_MS : undefined);
+  const where = whereFrom(final.inferenceSource, o.mode);
+  if (where === 'on-device') clearStall();
+  return { data: text, where, ms: Math.round(performance.now() - t0) };
 }
 
 // ===================== Privacy Router =====================
@@ -370,7 +387,7 @@ export function subscribeHybridStatus(cb: (s: HybridStatus) => void): () => void
   const onNet = () => refresh();
   addEventListener('online', onNet);
   addEventListener('offline', onNet);
-  const offStall = onDeviceStall(emit);
+  const offStall = onDeviceStall(refresh);
   return () => {
     removeEventListener('online', onNet);
     removeEventListener('offline', onNet);

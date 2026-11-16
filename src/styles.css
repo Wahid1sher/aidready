@@ -186,3 +186,30 @@ button:disabled { cursor: not-allowed; opacity: .5; }
 .bk-row { display: flex; gap: 8px; padding: 10px 14px 0; }
 .bk-row label { cursor: pointer; }
 .bk-msg { margin: 10px 14px 0; font-size: 12.5px; color: #1d4ed8; }
+
+/* Welcome and tutorial */
+.welcome { min-height: 100dvh; display: flex; flex-direction: column; padding-bottom: 28px; }
+@media (min-width: 640px) { .welcome { min-height: calc(100dvh - 48px); } }
+.skip { border: 0; background: none; padding: 6px 2px; font-size: 14px; font-weight: 500; color: var(--muted); }
+.skip:hover { color: var(--ink); }
+.wl-hero { margin-top: 44px; }
+.wl-hero h1 { margin: 22px 0 10px; font-size: 30px; line-height: 1.15; font-weight: 600; letter-spacing: -.025em; }
+.wl-hero p { margin: 0; font-size: 15.5px; line-height: 1.6; color: #4b5563; }
+.wl-points { list-style: none; margin: 22px 0 0; padding: 0; display: grid; gap: 10px; }
+.wl-points li { display: flex; align-items: center; gap: 10px; font-size: 14.5px; font-weight: 500; }
+.wl-points li::before { content: ''; flex: none; width: 18px; height: 18px; border-radius: 50%; background: #f0fdf4 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2316a34a' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 12.5 4 4 8-9'/%3E%3C/svg%3E") center/11px no-repeat; }
+.wl-actions { margin-top: auto; padding-top: 28px; display: grid; gap: 10px; }
+.wl-actions.row { grid-template-columns: 1fr 1.6fr; }
+.wl-count { margin: 34px 0 10px; color: var(--muted); font-size: 12px; }
+.wl-dots { display: flex; gap: 6px; }
+.wl-dots i { flex: 1; height: 4px; border-radius: 999px; background: #e5e7eb; transition: background .3s; }
+.wl-dots i.on { background: var(--blue); }
+.wl-step { margin-top: 36px; animation: wl-in .35s ease-out; }
+@keyframes wl-in { from { opacity: 0; transform: translateY(8px); } }
+@media (prefers-reduced-motion: reduce) { .wl-step { animation: none; } }
+.wl-ic { width: 64px; height: 64px; border-radius: 18px; display: grid; place-items: center; background: var(--ink); color: #7aa2ff; }
+.wl-step h2 { margin: 22px 0 8px; font-size: 26px; font-weight: 600; letter-spacing: -.02em; }
+.wl-step p { margin: 0; font-size: 15.5px; line-height: 1.6; color: #4b5563; }
+.wl-demo { margin-top: 24px; display: flex; justify-content: space-between; align-items: center; padding: 14px 16px; border: 1px solid var(--line); border-radius: 14px; background: #fff; font-size: 14px; box-shadow: 0 8px 20px rgba(0,0,0,.04); }
+.wl-demo b { font-size: 14px; }
+.tour-link { display: block; margin: 16px auto 0; border: 0; background: none; color: var(--blue); font-size: 13px; font-weight: 500; }
