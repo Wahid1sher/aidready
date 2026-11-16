@@ -50,7 +50,7 @@ export interface Claim {
   /** Ids of checklist steps the person has ticked. */
   checks: string[];
   /** Filled into the cover letter's placeholders; never sent to the AI. */
-  details: { name: string; address: string; ref: string };
+  details: { name: string; address: string; ref: string; insurer?: string };
   /** Application deadline from the person's official aid notice, YYYY-MM-DD, or '' if not set. */
   deadline: string;
   packet?: { text: string; at: number; where: Where };

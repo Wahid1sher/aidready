@@ -93,8 +93,17 @@ export async function draftLetter(c: Claim, allowCloud: boolean, onChunk: (t: st
   const prompt = `Write a short, plain cover letter (under 180 words) a household can send with their disaster damage inventory to an aid agency or insurer.
 Use only these facts; do not invent names, addresses, dates, policy numbers or amounts:
 ${packetFacts(c)}
-Leave [Your name], [Address] and [Claim or registration number] as placeholders.
+Start with "Dear [Insurer]," and end with "Sincerely," then [Your name] on its own line. Leave [Your name], [Address], [Claim or registration number] and [Insurer] exactly as written, as placeholders.
 Say the attached inventory lists each item with photos, and that estimates are replacement-cost estimates, not appraisals.
 No markdown.`;
   return generateText('letter', prompt, { mode: allowCloud ? InferenceMode.PREFER_IN_CLOUD : InferenceMode.ONLY_ON_DEVICE, temperature: 0.3 }, onChunk);
+}
+
+/** Fills the letter's placeholders with the person's details, on this device. Empty details keep the placeholder. */
+export function fillLetter(text: string, d: Claim['details']): string {
+  return text
+    .replaceAll('[Your name]', d.name || '[Your name]')
+    .replaceAll('[Address]', d.address || '[Address]')
+    .replaceAll('[Claim or registration number]', d.ref || '[Claim or registration number]')
+    .replaceAll('[Insurer]', d.insurer || '[Insurer]');
 }

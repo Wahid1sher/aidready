@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { cleanItems, packetFacts } from './ai';
+import { cleanItems, fillLetter, packetFacts } from './ai';
 import { newClaim } from './claim';
 
 describe('cleanItems', () => {
@@ -17,6 +17,14 @@ describe('cleanItems', () => {
       { name: 'Car', damage: 'Flooded', estimate: null },
     ]);
     expect(cleanItems('nope')).toEqual([]);
+  });
+});
+
+describe('fillLetter', () => {
+  it('fills given details and keeps placeholders for missing ones', () => {
+    const t = 'Dear [Insurer],\n[Your name]\n[Address]\nRef: [Claim or registration number]\n[Your name]';
+    expect(fillLetter(t, { name: 'Sam Lee', address: '', ref: 'FL-123', insurer: 'Acme Mutual' })).toBe('Dear Acme Mutual,\nSam Lee\n[Address]\nRef: FL-123\nSam Lee');
+    expect(fillLetter(t, { name: '', address: '', ref: '' })).toBe(t);
   });
 });
 

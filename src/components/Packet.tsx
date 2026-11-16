@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { ArrowLeft, Download, Printer, Sparkles } from 'lucide-react';
 import type { Ctx } from '../App';
 import { money, toCSV, totals } from '../lib/claim';
-import { draftLetter } from '../lib/ai';
+import { draftLetter, fillLetter } from '../lib/ai';
 import { Thumb } from './Thumb';
 
 export function Packet(c: Ctx) {
@@ -16,9 +16,8 @@ export function Packet(c: Ctx) {
 
   const d = c.claim.details;
   const setD = (k: keyof typeof d, v: string) => c.setClaim((x) => ({ ...x, details: { ...x.details, [k]: v } }));
-  // The AI only ever sees placeholders; your details are filled in here, on this device.
-  const filled = (s: string) =>
-    s.replace(/\[Your name\]/g, d.name || '[Your name]').replace(/\[Address\]/g, d.address || '[Address]').replace(/\[Claim or registration number\]/g, d.ref || '[Claim or registration number]');
+  // The AI only ever sees placeholders; your details are filled in here, on this device, as you type.
+  const shown = fillLetter(draft || letter, d);
 
   function downloadCSV() {
     const a = document.createElement('a');
@@ -63,6 +62,19 @@ export function Packet(c: Ctx) {
         Prepared {new Date().toLocaleDateString('en-US', { dateStyle: 'long' })} · {t.items} items · {c.claim.photos.length} photos
       </p>
 
+      <section className="noprint">
+        <div className="sec-h">
+          <span>Your details</span>
+          <span className="muted">Stay on this device</span>
+        </div>
+        <div className="details">
+          <input value={d.insurer ?? ''} placeholder="Insurance company or aid program" aria-label="Insurance company or aid program" onChange={(e) => setD('insurer', e.target.value)} />
+          <input value={d.name} placeholder="Your name" aria-label="Your name" autoComplete="name" onChange={(e) => setD('name', e.target.value)} />
+          <input value={d.address} placeholder="Damaged property address" aria-label="Damaged property address" autoComplete="street-address" onChange={(e) => setD('address', e.target.value)} />
+          <input value={d.ref} placeholder="Claim or registration number" aria-label="Claim or registration number" onChange={(e) => setD('ref', e.target.value)} />
+        </div>
+      </section>
+
       <section className="letter">
         <div className="sec-h noprint">
           <span>Cover letter</span>
@@ -75,26 +87,14 @@ export function Packet(c: Ctx) {
         {(draft || letter) && (
           <textarea
             className="letter-text"
-            value={draft || letter}
+            value={shown}
             readOnly={busy}
-            rows={12}
+            rows={14}
             aria-label="Cover letter"
             onChange={(e) => c.setClaim((x) => ({ ...x, packet: { ...x.packet!, text: e.target.value } }))}
           />
         )}
-        {(draft || letter) && <div className="print-only letter-print">{filled(draft || letter)}</div>}
-      </section>
-
-      <section className="noprint">
-        <div className="sec-h">
-          <span>Your details</span>
-          <span className="muted">Stay on this device</span>
-        </div>
-        <div className="details">
-          <input value={d.name} placeholder="Your name" aria-label="Your name" autoComplete="name" onChange={(e) => setD('name', e.target.value)} />
-          <input value={d.address} placeholder="Damaged property address" aria-label="Damaged property address" autoComplete="street-address" onChange={(e) => setD('address', e.target.value)} />
-          <input value={d.ref} placeholder="Claim or registration number" aria-label="Claim or registration number" onChange={(e) => setD('ref', e.target.value)} />
-        </div>
+        {(draft || letter) && <div className="print-only letter-print">{shown}</div>}
       </section>
 
       <section className="inv">
