@@ -140,3 +140,25 @@ button:disabled { cursor: not-allowed; opacity: .5; }
   .inv table { break-inside: avoid; }
   .photos { break-before: page; }
 }
+
+/* Added: logo, rooms, costs, checklist, details */
+.logo svg { display: block; }
+.room-name { display: block; width: 100%; border: 0; background: none; padding: 2px 6px; margin-left: -6px; border-radius: 6px; }
+.room-name:hover, .room-name:focus { background: #f1f2f4; outline: none; }
+.link-danger { display: block; margin: 14px auto 0; border: 0; background: none; color: #b91c1c; font-size: 13px; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
+.chip { display: inline-flex; align-items: center; gap: 4px; padding: 7px 11px; border-radius: 999px; border: 1px solid var(--line); background: #fff; font-size: 13px; }
+.chip:hover { border-color: var(--blue); color: var(--blue); }
+.checklist { padding-bottom: 4px; }
+.ck-h { display: flex; justify-content: space-between; padding: 13px 14px 6px; font-size: 13px; font-weight: 600; }
+.ck { display: grid; grid-template-columns: 18px 1fr; gap: 10px; align-items: start; padding: 8px 14px; font-size: 13px; color: #374151; cursor: pointer; }
+.ck input { position: absolute; opacity: 0; pointer-events: none; }
+.ck .box { width: 18px; height: 18px; border-radius: 5px; border: 1.5px solid #cfd4dc; display: grid; place-items: center; color: #fff; }
+.ck.on .box { background: #16a34a; border-color: #16a34a; }
+.ck.on { color: var(--faint); text-decoration: line-through; }
+.ck input:focus-visible + .box { outline: 2px solid var(--blue); outline-offset: 2px; }
+.details { display: grid; gap: 8px; }
+.details input { width: 100%; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; background: #fff; font-size: 14px; }
+.grand { display: flex; justify-content: space-between; margin-top: 6px; padding: 14px; border-radius: 12px; background: var(--ink); color: #fff; font-weight: 600; }
+.grand .mono { color: var(--amber); font-size: 15px; }
+.actions { display: flex; gap: 8px; }

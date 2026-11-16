@@ -5,8 +5,9 @@ import { scanPhoto, shrink } from './lib/ai';
 import { Home } from './components/Home';
 import { RoomView } from './components/RoomView';
 import { Packet } from './components/Packet';
+import { Costs } from './components/Costs';
 
-export type View = { name: 'home' } | { name: 'room'; id: string } | { name: 'packet' };
+export type View = { name: 'home' } | { name: 'room'; id: string } | { name: 'packet' } | { name: 'costs' };
 
 const CLOUD_KEY = 'ar:allowCloud';
 
@@ -89,6 +90,7 @@ export default function App() {
       {view.name === 'home' && <Home {...ctx} />}
       {view.name === 'room' && <RoomView {...ctx} roomId={view.id} />}
       {view.name === 'packet' && <Packet {...ctx} />}
+      {view.name === 'costs' && <Costs {...ctx} />}
     </div>
   );
 }

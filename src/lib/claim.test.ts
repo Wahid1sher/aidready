@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { daysLeft, newClaim, totals, type Claim } from './claim';
+import { daysLeft, newClaim, toCSV, totals, type Claim } from './claim';
 
 function claimWith(): Claim {
   const c = newClaim();
@@ -36,6 +36,25 @@ describe('totals', () => {
     expect(t.rooms[1].status).toBe('next');
     const fresh = totals(newClaim());
     expect(fresh.next?.name).toBe('Living room');
+  });
+});
+
+describe('toCSV', () => {
+  it('quotes cells, escapes quotes, and defuses spreadsheet formulas', () => {
+    const c = claimWith();
+    c.items[0].name = 'Sofa, "blue"';
+    c.items[1].name = '=HYPERLINK("x")';
+    c.expenses = [{ id: 'e', what: 'Hotel', amount: 240, date: '2026-11-10' }];
+    const lines = toCSV(c).split('\r\n');
+    expect(lines[0]).toBe('"Type","Room","Item","Damage","Estimate (USD)","Date"');
+    expect(lines[1]).toBe('"Item","Living room","Sofa, ""blue""","Water line","1200",""');
+    expect(lines[2]).toContain(`"'=HYPERLINK(""x"")"`);
+    expect(lines[4]).toBe('"Expense","","Hotel","","240","2026-11-10"');
+  });
+  it('counts extra costs in totals', () => {
+    const c = claimWith();
+    c.expenses = [{ id: 'e', what: 'Hotel', amount: 240, date: '' }, { id: 'f', what: 'Mops', amount: null, date: '' }];
+    expect(totals(c).costs).toBe(240);
   });
 });
 

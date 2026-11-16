@@ -32,23 +32,45 @@ export interface Room {
   done: boolean;
 }
 
+/** Out-of-pocket costs caused by the disaster (hotel, cleanup supplies…), often reimbursable. */
+export interface Expense {
+  id: string;
+  what: string;
+  amount: number | null;
+  date: string;
+}
+
 export interface Claim {
   id: string;
   createdAt: number;
   rooms: Room[];
   items: Item[];
   photos: Photo[];
+  expenses: Expense[];
+  /** Ids of checklist steps the person has ticked. */
+  checks: string[];
+  /** Filled into the cover letter's placeholders; never sent to the AI. */
+  details: { name: string; address: string; ref: string };
   /** Application deadline from the person's official aid notice, YYYY-MM-DD, or '' if not set. */
   deadline: string;
   packet?: { text: string; at: number; where: Where };
 }
+
+export const CHECKLIST = [
+  { id: 'photos', text: 'Photograph every room before you clean up or throw anything out' },
+  { id: 'keep', text: 'Keep damaged items, or a piece of them, until an inspector has seen them' },
+  { id: 'register', text: 'Register with your aid program and note your registration number' },
+  { id: 'insurer', text: 'Call your insurer and note your claim number' },
+  { id: 'receipts', text: 'Keep receipts for hotels, cleanup supplies and repairs' },
+  { id: 'docs', text: 'Copy your ID, insurance policy and proof of address' },
+];
 
 export const uid = () => crypto.randomUUID();
 
 const DEFAULT_ROOMS = ['Living room', 'Kitchen', 'Bedroom', 'Bathroom', 'Garage', 'Exterior'];
 
 export function newClaim(): Claim {
-  return { id: uid(), createdAt: Date.now(), rooms: DEFAULT_ROOMS.map((name) => ({ id: uid(), name, done: false })), items: [], photos: [], deadline: '' };
+  return { id: uid(), createdAt: Date.now(), rooms: DEFAULT_ROOMS.map((name) => ({ id: uid(), name, done: false })), items: [], photos: [], expenses: [], checks: [], details: { name: '', address: '', ref: '' }, deadline: '' };
 }
 
 // ---------- Derived numbers (pure, tested) ----------
@@ -87,6 +109,7 @@ export function totals(c: Claim) {
     items: c.items.length,
     unestimated: c.items.filter((i) => i.estimate === null).length,
     waiting: c.photos.filter((p) => !p.scanned).length,
+    costs: c.expenses.reduce((s, e) => s + (e.amount ?? 0), 0),
   };
 }
 
@@ -101,6 +124,19 @@ export function daysLeft(deadline: string, today = new Date()): number | null {
 
 export const money = (n: number) => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 0, maximumFractionDigits: 0 });
 
+/** Spreadsheet export of the inventory and costs, for insurer and aid portals that take CSV. */
+export function toCSV(c: Claim): string {
+  // Quote every cell; a leading = + - @ would run as a formula in Excel, so prefix it.
+  const cell = (v: string | number | null) => {
+    const s = v === null ? '' : String(v);
+    return '"' + (/^[=+\-@]/.test(s) ? "'" + s : s).replace(/"/g, '""') + '"';
+  };
+  const rows: (string | number | null)[][] = [['Type', 'Room', 'Item', 'Damage', 'Estimate (USD)', 'Date']];
+  for (const i of c.items) rows.push(['Item', c.rooms.find((r) => r.id === i.roomId)?.name ?? '', i.name, i.damage, i.estimate, '']);
+  for (const e of c.expenses) rows.push(['Expense', '', e.what, '', e.amount, e.date]);
+  return rows.map((r) => r.map(cell).join(',')).join('\r\n');
+}
+
 // ---------- Persistence ----------
 
 const KEY = 'ar:claim';
@@ -108,7 +144,8 @@ const KEY = 'ar:claim';
 export function loadClaim(): Claim {
   try {
     const raw = localStorage.getItem(KEY);
-    if (raw) return JSON.parse(raw) as Claim;
+    // Spread over a fresh claim so claims saved by older versions get the newer fields.
+    if (raw) return { ...newClaim(), ...(JSON.parse(raw) as Partial<Claim>) };
   } catch {
     /* fall through to a fresh claim */
   }

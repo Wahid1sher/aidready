@@ -17,6 +17,12 @@ export function RoomView(c: Ctx & { roomId: string }) {
     deletePhoto(id).catch(() => {});
     c.setClaim((x) => ({ ...x, photos: x.photos.filter((p) => p.id !== id), items: x.items.filter((i) => i.photoId !== id) }));
   };
+  const removeRoom = () => {
+    if (photos.length + items.length && !confirm(`Delete ${room.name} with its ${items.length} items and ${photos.length} photos? This can't be undone.`)) return;
+    photos.forEach((p) => deletePhoto(p.id).catch(() => {}));
+    c.setClaim((x) => ({ ...x, rooms: x.rooms.filter((r) => r.id !== room.id), photos: x.photos.filter((p) => p.roomId !== room.id), items: x.items.filter((i) => i.roomId !== room.id) }));
+    c.setView({ name: 'home' });
+  };
   const addManual = () =>
     c.setClaim((x) => ({ ...x, items: [...x.items, { id: uid(), roomId: room.id, photoId: '', name: '', damage: '', estimate: null, estimateBy: null, where: 'on-device' }] }));
   const onFiles = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -33,7 +39,12 @@ export function RoomView(c: Ctx & { roomId: string }) {
         <span className={`st ${room.done ? 'ok' : 'nx'}`}>{room.done ? 'Done' : 'In progress'}</span>
       </header>
 
-      <p className="lbl">{room.name}</p>
+      <input
+        className="lbl room-name"
+        value={room.name}
+        aria-label="Room name"
+        onChange={(e) => c.setClaim((x) => ({ ...x, rooms: x.rooms.map((r) => (r.id === room.id ? { ...r, name: e.target.value } : r)) }))}
+      />
       <span className="amt">
         {money(sum)}
         <span>.00</span>
@@ -121,9 +132,15 @@ export function RoomView(c: Ctx & { roomId: string }) {
 
       <button
         className={room.done ? 'ghost wide' : 'dark wide'}
-        onClick={() => c.setClaim((x) => ({ ...x, rooms: x.rooms.map((r) => (r.id === room.id ? { ...r, done: !r.done } : r)) }))}
+        onClick={() => {
+          c.setClaim((x) => ({ ...x, rooms: x.rooms.map((r) => (r.id === room.id ? { ...r, done: !r.done } : r)) }));
+          if (!room.done) c.setView({ name: 'home' });
+        }}
       >
         <Check size={17} aria-hidden /> {room.done ? 'Reopen room' : 'Mark room done'}
+      </button>
+      <button className="link-danger" onClick={removeRoom}>
+        Delete this room
       </button>
     </main>
   );

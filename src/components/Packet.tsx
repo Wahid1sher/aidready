@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { ArrowLeft, Printer, Sparkles } from 'lucide-react';
+import { ArrowLeft, Download, Printer, Sparkles } from 'lucide-react';
 import type { Ctx } from '../App';
-import { money, totals } from '../lib/claim';
+import { money, toCSV, totals } from '../lib/claim';
 import { draftLetter } from '../lib/ai';
 import { Thumb } from './Thumb';
 
@@ -13,6 +13,20 @@ export function Packet(c: Ctx) {
   const letter = c.claim.packet?.text ?? '';
   const cloudOk = c.allowCloud && c.status.online;
   const canWrite = cloudOk || c.status.device === 'available';
+
+  const d = c.claim.details;
+  const setD = (k: keyof typeof d, v: string) => c.setClaim((x) => ({ ...x, details: { ...x.details, [k]: v } }));
+  // The AI only ever sees placeholders; your details are filled in here, on this device.
+  const filled = (s: string) =>
+    s.replace(/\[Your name\]/g, d.name || '[Your name]').replace(/\[Address\]/g, d.address || '[Address]').replace(/\[Claim or registration number\]/g, d.ref || '[Claim or registration number]');
+
+  function downloadCSV() {
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([toCSV(c.claim)], { type: 'text/csv' }));
+    a.download = `aidready-inventory-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  }
 
   async function write() {
     setBusy(true);
@@ -34,9 +48,14 @@ export function Packet(c: Ctx) {
         <button className="back" onClick={() => c.setView({ name: 'home' })}>
           <ArrowLeft size={18} aria-hidden /> Claim
         </button>
-        <button className="mini" onClick={() => print()}>
-          <Printer size={15} aria-hidden /> Print or save PDF
-        </button>
+        <div className="actions">
+          <button className="mini" onClick={downloadCSV}>
+            <Download size={15} aria-hidden /> CSV
+          </button>
+          <button className="mini" onClick={() => print()}>
+            <Printer size={15} aria-hidden /> Print or PDF
+          </button>
+        </div>
       </header>
 
       <h1 className="doc-h">Household damage inventory</h1>
@@ -63,7 +82,19 @@ export function Packet(c: Ctx) {
             onChange={(e) => c.setClaim((x) => ({ ...x, packet: { ...x.packet!, text: e.target.value } }))}
           />
         )}
-        {(draft || letter) && <div className="print-only letter-print">{draft || letter}</div>}
+        {(draft || letter) && <div className="print-only letter-print">{filled(draft || letter)}</div>}
+      </section>
+
+      <section className="noprint">
+        <div className="sec-h">
+          <span>Your details</span>
+          <span className="muted">Stay on this device</span>
+        </div>
+        <div className="details">
+          <input value={d.name} placeholder="Your name" aria-label="Your name" autoComplete="name" onChange={(e) => setD('name', e.target.value)} />
+          <input value={d.address} placeholder="Damaged property address" aria-label="Damaged property address" autoComplete="street-address" onChange={(e) => setD('address', e.target.value)} />
+          <input value={d.ref} placeholder="Claim or registration number" aria-label="Claim or registration number" onChange={(e) => setD('ref', e.target.value)} />
+        </div>
       </section>
 
       <section className="inv">
@@ -99,6 +130,34 @@ export function Packet(c: Ctx) {
               </tbody>
             </table>
           ))}
+        {c.claim.expenses.length > 0 && (
+          <table>
+            <caption>
+              <span>Extra costs</span>
+              <span className="mono">{money(t.costs)}</span>
+            </caption>
+            <thead>
+              <tr>
+                <th>Cost</th>
+                <th>Date</th>
+                <th className="r">Amount</th>
+              </tr>
+            </thead>
+            <tbody>
+              {c.claim.expenses.map((e) => (
+                <tr key={e.id}>
+                  <td>{e.what || 'Unnamed cost'}</td>
+                  <td>{e.date}</td>
+                  <td className="r mono">{e.amount === null ? 'TBD' : money(e.amount)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+        <div className="grand">
+          <span>Total claimed</span>
+          <span className="mono">{money(t.total + t.costs)}</span>
+        </div>
         <p className="note">Estimates are approximate replacement costs, not appraisals. {t.unestimated ? `${t.unestimated} items still need an estimate.` : ''}</p>
       </section>
 

@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { ArrowRight, Camera, FileText } from 'lucide-react';
+import { ArrowRight, Camera, Check, FileText, Plus, Receipt } from 'lucide-react';
 import type { Ctx } from '../App';
-import { daysLeft, money, totals } from '../lib/claim';
+import { CHECKLIST, daysLeft, money, totals, uid } from '../lib/claim';
 import { StatusPill } from './StatusPill';
+import { Logo } from './Logo';
 
 const SEG = ['#2f6bff', '#7aa2ff', '#c7d6ff'];
 
@@ -23,14 +24,15 @@ export function Home(c: Ctx) {
   const top = ranked.slice(0, 3);
   const rest = t.rooms.filter((r) => !top.includes(r));
   const restSum = rest.reduce((s, r) => s + r.sum, 0);
-  const todayRoom = t.addedToday > 0 ? c.claim.rooms.find((r) => c.claim.photos.some((p) => p.roomId === r.id && new Date(p.takenAt).toDateString() === new Date().toDateString())) : undefined;
+  const todayRooms = c.claim.rooms.filter((r) => c.claim.items.some((i) => i.roomId === r.id && c.claim.photos.some((p) => p.id === i.photoId && new Date(p.takenAt).toDateString() === new Date().toDateString())));
+  const todayRoom = todayRooms.length === 1 ? todayRooms[0] : undefined;
   const due = c.claim.deadline ? new Date(c.claim.deadline + 'T12:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '';
 
   return (
     <main className="screen">
       <header className="top">
         <div className="logo">
-          <i aria-hidden />
+          <Logo />
           AidReady
         </div>
         <StatusPill {...c} />
@@ -71,6 +73,16 @@ export function Home(c: Ctx) {
             </span>
           </button>
         ))}
+        <button
+          className="add"
+          onClick={() => {
+            const id = uid();
+            c.setClaim((x) => ({ ...x, rooms: [...x.rooms, { id, name: `Room ${x.rooms.length + 1}`, done: false }] }));
+            c.setView({ name: 'room', id });
+          }}
+        >
+          <Plus size={15} aria-hidden /> Add a room
+        </button>
       </section>
 
       {editDate ? (
@@ -104,6 +116,40 @@ export function Home(c: Ctx) {
         </span>
         <ArrowRight size={16} aria-hidden />
       </button>
+
+      <button className="row-link" onClick={() => c.setView({ name: 'costs' })}>
+        <Receipt size={18} aria-hidden />
+        <span>
+          Extra costs
+          <small>{c.claim.expenses.length ? `${c.claim.expenses.length} costs · ${money(t.costs)}` : 'Hotel, cleanup, meals: often paid back'}</small>
+        </span>
+        <ArrowRight size={16} aria-hidden />
+      </button>
+
+      <section className="card checklist" aria-label="Checklist">
+        <div className="ck-h">
+          <span>Before you clean up</span>
+          <span className="mono">
+            {c.claim.checks.length}/{CHECKLIST.length}
+          </span>
+        </div>
+        {CHECKLIST.map((s) => {
+          const on = c.claim.checks.includes(s.id);
+          return (
+            <label key={s.id} className={`ck ${on ? 'on' : ''}`}>
+              <input
+                type="checkbox"
+                checked={on}
+                onChange={() => c.setClaim((x) => ({ ...x, checks: on ? x.checks.filter((k) => k !== s.id) : [...x.checks, s.id] }))}
+              />
+              <span className="box" aria-hidden>
+                {on && <Check size={12} strokeWidth={3} />}
+              </span>
+              {s.text}
+            </label>
+          );
+        })}
+      </section>
 
       <p className="note">Estimates are replacement-cost estimates to help you fill in your claim, not appraisals. Check each one.</p>
 

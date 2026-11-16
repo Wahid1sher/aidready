@@ -84,7 +84,8 @@ export function packetFacts(c: Claim) {
   const rooms = t.rooms.filter((r) => r.count > 0).map((r) => `${r.room.name}: ${r.count} items, ${money(r.sum)}`);
   return `Total documented damage: ${money(t.total)} across ${t.items} items.
 Rooms: ${rooms.join('; ') || 'none yet'}.
-${t.unestimated ? `Items still needing an estimate: ${t.unestimated}.\n` : ''}Photos attached: ${c.photos.length}.`;
+${t.costs ? `Extra out-of-pocket costs (hotel, cleanup and similar): ${money(t.costs)}.
+` : ''}${t.unestimated ? `Items still needing an estimate: ${t.unestimated}.\n` : ''}Photos attached: ${c.photos.length}.`;
 }
 
 /** Drafts the cover letter. Cloud gives the best writing; on-device works too when offline. */
